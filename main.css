@@ -1,0 +1,34 @@
+h1 {
+  text-align: center;
+}
+.board-container {
+  margin: auto;
+}
+
+.cell {
+  font-size: 1.5em;
+  width: 2em;
+  height: 2em;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+table, td {
+  margin: 50px auto;
+  background-color: rgba(163, 240, 200, 0.076);
+  border: 1px solid rgb(37, 104, 71);
+  width: 10em;
+  height: 3em;
+  text-align: center;
+  
+}
+
+td{
+    cursor: pointer;
+}
+button {
+    
+}
