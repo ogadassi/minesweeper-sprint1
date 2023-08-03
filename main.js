@@ -102,10 +102,10 @@ function setMinesNegsCount(gBoard, rowIdx, colIdx) {
 
 
 function onCellClicked(elCell, i, j) {
-    if (gIsFirstClick) {
-        setMines(gBoard[i][j])
-        gIsFirstClick = false
-    }
+    // if (gIsFirstClick) {
+    //     setMines(gBoard[i][j])
+    //     gIsFirstClick = false
+    // }
     if (gIsGameOn) {
         const cell = gBoard[i][j]
         if (!cell.isMine) {
