@@ -6,7 +6,8 @@ var gCount
 var gBoard
 var gIsGameOn = true
 var gShownCells = 0
-//var gIsFirstClick = true
+var gIsFirstClick = true
+var gMarkedBombs = 0
 var gLevel = {
     SIZE: 4,
     MINES: 2
@@ -38,6 +39,7 @@ function getDifficulty(elBtn) {
     elBtn.style.backgroundColor = 'rgb(184, 236, 219)'
     gCount = 1
     renderBoard(gBoard)
+    onInit()
 }
 
 function createBoard() {
@@ -50,6 +52,7 @@ function createBoard() {
                 isMine: 0,
                 isMarked: false,
                 minesAroundCount: 0,
+
             }
             board[i][j] = cell
         }
@@ -62,7 +65,7 @@ function createBoard() {
             //           console.log(board[i][j].minesAroundCount);
         }
     }
-    //  console.log(board);
+    // console.log(board);
 
     return board
 }
@@ -72,12 +75,8 @@ function renderBoard(board) {
     for (var i = 0; i < board.length; i++) {
         strHTML += '<tr>'
         for (var j = 0; j < board[0].length; j++) {
-            const cell = board[i][j]
             var cellContent = ''
-
-
-
-            strHTML += `<td onclick="onCellClicked(this, ${i}, ${j})">${cellContent}</td>`
+            strHTML += `<td class='row${i}-col${j}' oncontextmenu="onMarkCell(event, this, ${i}, ${j})" onclick="onCellClicked(this, ${i}, ${j})">${cellContent}</td>`
         }
         strHTML += '</tr>'
     }
@@ -108,6 +107,8 @@ function onCellClicked(elCell, i, j) {
     // }
     if (gIsGameOn) {
         const cell = gBoard[i][j]
+        if (cell.isMarked) return
+
         if (!cell.isMine) {
             elCell.style.backgroundColor = 'white'
             //showSafeNegs(i, j)
@@ -131,9 +132,28 @@ function onCellClicked(elCell, i, j) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function markCell(elCell, i, j) {
+function onMarkCell(event, elCell, i, j) {
+    event.preventDefault();
     const cell = gBoard[i][j]
+    if (!gIsGameOn) return
+    if (cell.isShown) return
+    if (!gBoard[i][j].isMarked) {
+        var elCell = document.querySelector('.row' + i + '-col' + j)
+        cell.isMarked = true
+        if (cell.isMine) gMarkedBombs++
+        elCell.innerText = MARKED
+    } else if (gBoard[i][j].isMarked) {
+        cell.isMarked = false
+        if (cell.isMine) gMarkedBombs--
+        elCell.innerText = ''
+    }
+    detectWin()
+    console.log(gMarkedBombs,gLevel.MINES);
+
 }
+
+
+
 
 
 //bonus
@@ -162,33 +182,52 @@ function markCell(elCell, i, j) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function revealBombs(lost) {
+
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[i].length; j++) {
+            if (gBoard[i][j].isMine) {
+                var elCell = document.querySelector('.row' + i + '-col' + j)
+                elCell.innerText = '💣'
+                if (lost) elCell.style.backgroundColor = 'rgb(157, 62, 62)'
+            }
+        }
+    }
+}
+
+
+
+
 function detectWin() {
-    if (gShownCells === (gLevel.SIZE ** 2) - gLevel.MINES) {
+    if (gShownCells === (gLevel.SIZE ** 2) - gLevel.MINES && gMarkedBombs === gLevel.MINES) {
         var elEmoji = document.querySelector('.emoji')
         elEmoji.innerText = '😎'
         gIsGameOn = false
+        revealBombs(false)
     }
+
 }
 
 function gameOver() {
     gIsGameOn = false
     var elEmoji = document.querySelector('.emoji')
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard[i].length; j++) {
-            const cell = gBoard[i][j]
-            if (cell.isMine) {
-
-            }
-        }
-    }
+    
     elEmoji.innerText = '🤯'
+    revealBombs(true)
     //console.log('Game Over');
 }
+
+
+
+
+
 
 function onRestart() {
     gIsGameOn = true
     var elEmoji = document.querySelector('.emoji')
     elEmoji.innerText = '😀'
+    gMarkedBombs = 0
     gShownCells = 0
     onInit()
 }
