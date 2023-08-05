@@ -23,7 +23,7 @@ h1 {
 table,
 td {
   margin: 50px auto;
-  background-color: rgba(50, 136, 90, 0.429);
+  background-color: rgba(50, 136, 90, 0.3);
   border: 1px solid rgb(37, 104, 71);
   width: 50px;
   height: 50px;
@@ -53,16 +53,32 @@ td .empty-cell {
   border: 3px solid rgba(50, 136, 90, 0.429);
 }
 .emoji {
-  margin: auto;
   background-color: rgba(50, 136, 90, 0.429);
   border: 1px solid rgb(37, 104, 71);
   height: 30px;
+  border-radius: 30px;
+  cursor: pointer;
+  color: rgb(12, 43, 28);
+  font-weight: bolder;
+  font-family: cursive;
+}
+
+.lives {
+  background-color: rgba(50, 136, 90, 0.429);
+  border: 1px solid rgb(37, 104, 71);
   text-align: center;
+  width: 90px;
+  height: 25px;
   border-radius: 30px;
   margin-bottom: 10px;
-  cursor: pointer;
-  display: block;
+  color: rgb(12, 43, 28);
+  font-weight: bolder;
+  font-family: cursive;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
 
 .diff {
   background-color: rgba(50, 136, 90, 0.429);
@@ -75,3 +91,4 @@ td .empty-cell {
   font-weight: bolder;
   font-family: cursive;
 }
+

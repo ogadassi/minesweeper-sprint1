@@ -3,11 +3,13 @@ const MINE = '💣'
 const SHOWN = '.'
 const MARKED = '🚩'
 var gCount
+var gLives = 3
 var gBoard
 var gIsGameOn = true
 var gShownCells = 0
 var gIsFirstClick = true
 var gMarkedBombs = 0
+var gClickedBombs = 0
 var gLevel = {
     SIZE: 4,
     MINES: 2
@@ -27,14 +29,17 @@ function getDifficulty(elBtn) {
         gLevel.SIZE = 4
         gLevel.MINES = 2
         gBoard = createBoard(gLevel.SIZE)
+        onRestart()
     } else if (diff.contains('diff2')) {
         gLevel.SIZE = 8
         gLevel.MINES = 14
         gBoard = createBoard(gLevel.SIZE)
+        onRestart()
     } else if (diff.contains('diff3')) {
         gLevel.SIZE = 12
         gLevel.MINES = 32
         gBoard = createBoard(gLevel.SIZE)
+        onRestart()
     }
     elBtn.style.backgroundColor = 'rgb(184, 236, 219)'
     gCount = 1
@@ -44,7 +49,6 @@ function getDifficulty(elBtn) {
 
 function createBoard() {
     const board = []
-
     for (var i = 0; i < gLevel.SIZE; i++) {
         board[i] = []
         for (var j = 0; j < gLevel.SIZE; j++) {
@@ -57,16 +61,6 @@ function createBoard() {
             board[i][j] = cell
         }
     }
-    //console.log(board)
-    setMines(board)
-    for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board.length; j++) {
-            board[i][j].minesAroundCount = setMinesNegsCount(board, i, j)
-            //           console.log(board[i][j].minesAroundCount);
-        }
-    }
-    // console.log(board);
-
     return board
 }
 
@@ -101,12 +95,22 @@ function setMinesNegsCount(gBoard, rowIdx, colIdx) {
 
 
 function onCellClicked(elCell, i, j) {
-    // if (gIsFirstClick) {
-    //     setMines(gBoard[i][j])
-    //     gIsFirstClick = false
-    // }
+
     if (gIsGameOn) {
         const cell = gBoard[i][j]
+        if (gIsFirstClick) {
+            setMines(gBoard)
+            for (var i = 0; i < gBoard.length; i++) {
+                for (var j = 0; j < gBoard[i].length; j++) {
+                    gBoard[i][j].minesAroundCount = setMinesNegsCount(gBoard, i, j)
+                    //           console.log(board[i][j].minesAroundCount);
+                }
+            }
+            gIsFirstClick = false
+        }
+
+        if (cell.isShown) return
+
         if (cell.isMarked) return
 
         if (!cell.isMine) {
@@ -118,38 +122,40 @@ function onCellClicked(elCell, i, j) {
             cell.isShown = true
             gShownCells++
         }
+        if (cell.isMine && cell.isShown) return
         if (cell.isMine) {
+            cell.isShown = true
             elCell.innerText = '💣'
-            elCell.style.backgroundColor = 'rgb(157, 62, 62)'
-            gameOver()
+            if (gLives > 0) { elCell.style.backgroundColor = 'rgb(242, 231, 105)' }
+            else { elCell.style.backgroundColor = 'rgb(157, 62, 62)' }
+            gLives--
+            gClickedBombs++
+            document.querySelector('.lives').innerText = 'Lives:' + gLives
+            //console.log(gLives);
+            if (gLives === 0) gameOver()
         }
-        if (cell.isMarked) return
+
         detectWin()
+        console.log(gMarkedBombs, gClickedBombs, gShownCells,);
     }
     //console.log(gBoard);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 function onMarkCell(event, elCell, i, j) {
     event.preventDefault();
     const cell = gBoard[i][j]
-    if (!gIsGameOn) return
     if (cell.isShown) return
-    if (!gBoard[i][j].isMarked) {
-        var elCell = document.querySelector('.row' + i + '-col' + j)
-        cell.isMarked = true
-        if (cell.isMine) gMarkedBombs++
-        elCell.innerText = MARKED
-    } else if (gBoard[i][j].isMarked) {
+    if (cell.isMarked) {
+        elCell.innerText = ''
         cell.isMarked = false
         if (cell.isMine) gMarkedBombs--
-        elCell.innerText = ''
+    } else {
+        elCell.innerText = MARKED
+        cell.isMarked = true
+        if (cell.isMine) gMarkedBombs++
     }
     detectWin()
-    console.log(gMarkedBombs,gLevel.MINES);
-
+    console.log(gMarkedBombs, gClickedBombs, gShownCells,);
 }
 
 
@@ -200,19 +206,18 @@ function revealBombs(lost) {
 
 
 function detectWin() {
-    if (gShownCells === (gLevel.SIZE ** 2) - gLevel.MINES && gMarkedBombs === gLevel.MINES) {
+    if ((gShownCells === (gLevel.SIZE ** 2) - gLevel.MINES && gMarkedBombs === (gLevel.MINES - gClickedBombs))) {
         var elEmoji = document.querySelector('.emoji')
         elEmoji.innerText = '😎'
         gIsGameOn = false
         revealBombs(false)
+        console.log(gShownCells);
     }
-
 }
 
 function gameOver() {
     gIsGameOn = false
     var elEmoji = document.querySelector('.emoji')
-    
     elEmoji.innerText = '🤯'
     revealBombs(true)
     //console.log('Game Over');
@@ -229,6 +234,10 @@ function onRestart() {
     elEmoji.innerText = '😀'
     gMarkedBombs = 0
     gShownCells = 0
+    gClickedBombs = 0
+    gLives = 3
+    document.querySelector('.lives').innerText = 'Lives:' + gLives
+    gIsFirstClick = true
     onInit()
 }
 
